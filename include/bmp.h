@@ -7,18 +7,11 @@
 #define HEADER_FIELD_COUNT 15
 #define HEADER_FIELD_SIZES {/* H */2, 4, 4, 4, /* IH */ 4, 4, 4, 2, 2, 4, 4, 4, 4, 4, 4}
 
-typedef struct image_T {
-    int depth;
-    size_t width;
-    size_t height;
-    uint8_t * data;
-} image_T;
 
 // h for header, ih for infoheader. More info in here:
 // https://www.ece.ualberta.ca/~elliott/ee552/studentAppNotes/2003_w/misc/bmp_file_format/bmp_file_format.htm
 
 typedef struct header_T{ 
-    size_t field_sizes[HEADER_FIELD_COUNT];
     uint32_t h_signature;
     uint32_t h_file_size;
     uint32_t h_unused_0;
@@ -36,5 +29,10 @@ typedef struct header_T{
     uint32_t ih_important_colors;
 } header_T;
 
+typedef struct image_T {
+    header_T header;
+    uint8_t * data;
+} image_T;
 
 image_T load_bmp_from_file(FILE * bitmap_file);
+void write_bmp(image_T image, FILE * bitmap_file);
