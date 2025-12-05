@@ -34,5 +34,7 @@ typedef struct image_T {
     uint8_t * data;
 } image_T;
 
+
+
 image_T load_bmp_from_file(FILE * bitmap_file);
 void write_bmp(image_T image, FILE * bitmap_file);

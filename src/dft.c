@@ -1,13 +1,11 @@
-#include "../include/fft.h"
+#include "../include/dft.h"
 
 cdouble_T cmplx_multiply(cdouble_T x, cdouble_T y){
     cdouble_T product = {0,0};
     product.re = x.re * y.re - x.im * y.im;
     product.im = x.re * y.im + y.re * x.im;
     return product;
-
 }
-
 
 cdouble_T cmplx_magnify(double magnitude, cdouble_T number){
     cdouble_T out = {number.re, number.im};
@@ -33,6 +31,10 @@ cdouble_T cis(double theta){
 
 double cmplx_abs(cdouble_T number){
     return sqrt(pow(number.re, 2) + pow(number.im, 2));
+}
+
+double cmplx_angle(cdouble_T number){
+    return atan2(number.im, number.re);
 }
 
 cdouble_T cmplx_normalize(cdouble_T number){
@@ -93,18 +95,18 @@ int real_fft(double * data, uint32_t N, cdouble_T * out){
 
     fft_recursive(X, N);
 
-    memcpy(out, X, N/2 * sizeof(cdouble_T));
-
+    memcpy(out, X, N * sizeof(cdouble_T));
+    free(X);
     return 0; 
 }
 
 
 int real_dft(double * data, uint32_t N, cdouble_T * out){
-    for(size_t i = 0; i < N/2; i++){
+    for(size_t i = 0; i < N; i++){
         out[i].re = 0;
         out[i].im = 0;
     }
-    for (uint32_t k = 0; k < N/2; k++){
+    for (uint32_t k = 0; k < N; k++){
         for (uint32_t i = 0; i < N; i++){ 
             cdouble_T exp = cis(-i * 2 * M_PI * ((double) k)/N);
             out[k] = cmplx_add(out[k], cmplx_magnify(data[i], exp));
@@ -113,13 +115,35 @@ int real_dft(double * data, uint32_t N, cdouble_T * out){
     return 0;
 }
 
-cdouble_T * calculate_dft(double * data , uint32_t N){
+void fft(cdouble_T * data, uint32_t N, cdouble_T * out){
+    memcpy(out, data, N * sizeof(cdouble_T));
+    fft_recursive(out, N); 
+    return;
+}
+
+
+void dft(cdouble_T * data, uint32_t N, cdouble_T * out){
+    for(size_t i = 0; i < N; i++){
+        out[i].re = 0;
+        out[i].im = 0;
+    }
+    
+    for (uint32_t k = 0; k < N; k++){
+        for (uint32_t i = 0; i < N; i++){ 
+            cdouble_T exp = cis(-i * 2 * M_PI * ((double) k)/N);
+            out[k] = cmplx_add(out[k], cmplx_multiply(data[i], exp));
+        }
+    }
+    return;
+}
+
+cdouble_T * calculate_real_dft(double * data , uint32_t N){
     if(N < 1){
         printf("ERROR: real_dft() - N cannot be 0.\n");
         return NULL;
     }
-    cdouble_T * X = (cdouble_T * ) malloc((N / 2) * sizeof(cdouble_T));
-    for (uint32_t i = 0; i < N / 2; i++){
+    cdouble_T * X = (cdouble_T * ) malloc(N * sizeof(cdouble_T));
+    for (uint32_t i = 0; i < N; i++){
         X[i].re = 0;
         X[i].im = 0;
     }
@@ -127,6 +151,24 @@ cdouble_T * calculate_dft(double * data , uint32_t N){
         real_fft(data, N, X);
     }else{
         real_dft(data, N, X);
+    }
+    return X;
+}
+
+cdouble_T * calculate_dft(cdouble_T * data , uint32_t N){
+    if(N < 1){
+        printf("ERROR: real_dft() - N cannot be 0.\n");
+        return NULL;
+    }
+    cdouble_T * X = (cdouble_T * ) malloc(N * sizeof(cdouble_T));
+    for (uint32_t i = 0; i < N / 2; i++){
+        X[i].re = 0;
+        X[i].im = 0;
+    }
+    if(is_power_of_two(N) != 0){
+        fft(data, N, X);
+    }else{
+        dft(data, N, X);
     }
     return X;
 }

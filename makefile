@@ -10,5 +10,5 @@ run: $(TARGET)
 	@./$(TARGET)
 
 debug: $(SOURCES)
-	@gcc $(CFLAGS) -g $(LDFLAGS) $(SOURCES) -o $(TARGET)
+	@gcc $(CFLAGS) -g -fsanitize=address $(LDFLAGS) $(SOURCES) -o $(TARGET)
 	@gdb ./$(TARGET)
