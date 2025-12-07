@@ -88,13 +88,14 @@ image_T convert_dgray_to_image(dgray_image_T dgray_image){
 
 // hue must be between 0 and 6 for odd comfort
 void hv_to_rgb(double hue, double value, uint8_t * red, uint8_t * green, uint8_t * blue){ 
-    uint8_t x = (uint8_t) (256.0 * value * (1 - fabs(fmod(hue, 2.0) - 1)));
-    if      (hue < 1) { *red = (uint8_t) (value * 256.0); *green = x; *blue = 0; }
-    else if (hue < 2) { *red = x; *green = (uint8_t) (value * 256.0); *blue = 0; }
-    else if (hue < 3) { *red = 0; *green = (uint8_t) (value * 256.0); *blue = x; }
-    else if (hue < 4) { *red = 0; *green = x; *blue = (uint8_t) (value * 256.0); }
-    else if (hue < 5) { *red = x; *green = 0; *blue = (uint8_t) (value * 256.0); }
-    else              { *red = (uint8_t) (value * 256.0); *green = 0; *blue = x; }
+    uint8_t x = (uint8_t) (255.0 * value * (1 - fabs(fmod(hue, 2.0) - 1)));
+    uint8_t y = (uint8_t) (value * 255.0);
+    if      (hue < 1) { *red = y; *green = x; *blue = 0; }
+    else if (hue < 2) { *red = x; *green = y; *blue = 0; }
+    else if (hue < 3) { *red = 0; *green = y; *blue = x; }
+    else if (hue < 4) { *red = 0; *green = x; *blue = y; }
+    else if (hue < 5) { *red = x; *green = 0; *blue = y; }
+    else              { *red = y; *green = 0; *blue = x; }
 }
 
 image_T convert_cd_to_image(cd_image_T cd_image){ 
@@ -108,13 +109,13 @@ image_T convert_cd_to_image(cd_image_T cd_image){
 
     double max = 0;
     for(size_t i = 0; i < image_size_px; i++){
-        double contender = cmplx_abs(cd_image.data[i]);
-        max = (contender > max) ? contender : max;
+        double max_contender = cmplx_abs(cd_image.data[i]);
+        max = (max_contender > max) ? max_contender : max;
     } 
 
     for (uint32_t i = 0; i < image_size_px * bytes_per_pixel; i+=3){
-        double magnitude = 1 + cmplx_abs(cd_image.data[i/3]);
-        double value = log10(magnitude) / log10(1 + max);
+        double magnitude = cmplx_abs(cd_image.data[i/3]);
+        double value = log10(1 + magnitude) / log10(1 + max);
         double hue = (3 * cmplx_angle(cd_image.data[i/3])) / M_PI; 
         uint8_t red, green, blue;
         if (hue < 0) hue += 6.0; // So it's between 0 and 6
