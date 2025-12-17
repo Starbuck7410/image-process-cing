@@ -1,6 +1,6 @@
 SOURCES := $(wildcard src/*.c)
 TARGET  := imgprocc
-CFLAGS  := -Wall -Wextra
+CFLAGS  := -Wall -Wextra -fanalyzer
 LDFLAGS := -lm
 
 $(TARGET): $(SOURCES)

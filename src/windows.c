@@ -7,6 +7,7 @@ void window_trapezoid( window_T * window){
     int window_size = (*window).length;
     int fade = (*window).fade;
     double * window_data = (double *) malloc((window_size) * sizeof(double));
+    if(!window_data) return;
     for(int i = 0; i < fade; i++){
         window_data[i] = (double) i / fade;
     }
@@ -26,6 +27,7 @@ void window_tukey(window_T * window){
     int window_size = (*window).length;
     int fade = (*window).fade;
     double * window_data = (double *) malloc((window_size) * sizeof(double));
+    if(!window_data) return;
     for(int i = 0; i < fade; i++){
         window_data[i] = 0.5 - 0.5 * cos(M_PI * i / fade);
     }
@@ -44,6 +46,8 @@ void window_tukey(window_T * window){
 void window_blackman_harris(window_T * window){
     int window_size = (*window).length;
     double * window_data = (double *) malloc(window_size * sizeof(double));
+    if(!window_data) return;
+
     double a[4] = {
 	    0.35875,
     	0.48829,

@@ -106,6 +106,9 @@ image_T convert_cd_to_image(cd_image_T cd_image){
     size_t image_size_px = image.header.ih_height * image.header.ih_width;
     size_t bytes_per_pixel = image.header.ih_bits_per_pixel / 8;
     uint8_t * image_data = malloc(image_size_px * bytes_per_pixel * sizeof(uint8_t));
+    if(!image_data){
+        return (image_T) {0};
+    }
 
     double max = 0;
     for(size_t i = 0; i < image_size_px; i++){
@@ -132,6 +135,8 @@ image_T convert_cd_to_image(cd_image_T cd_image){
 
 cdouble_T * get_cd_column(cd_image_T cd_image, size_t column){
     cdouble_T * column_data = malloc(cd_image.height * sizeof(cdouble_T));
+    if(!column_data) return NULL;
+    if(!cd_image.data) return NULL;
     for(size_t i = 0; i < cd_image.height; i++){
         column_data[i] = cd_image.data[column + i * cd_image.width];
     }
@@ -139,6 +144,8 @@ cdouble_T * get_cd_column(cd_image_T cd_image, size_t column){
 }
 
 void store_cd_column(cd_image_T cd_image, size_t column, cdouble_T * column_data){
+    if(!column_data) return;
+    if(!cd_image.data) return;
     for(size_t i = 0; i < cd_image.height; i++){
         cd_image.data[column + i * cd_image.width] = column_data[i];
     }
@@ -147,6 +154,7 @@ void store_cd_column(cd_image_T cd_image, size_t column, cdouble_T * column_data
 
 void cd_fft_shift(cd_image_T cd_image){
     cdouble_T * temp_row = malloc(cd_image.width * sizeof(cdouble_T));
+    if(!temp_row) goto error;
     for(size_t i = 0; i < cd_image.height / 2; i++){
         cdouble_T * cd_row_bottom = cd_image.data + cd_image.width * i;
         cdouble_T * cd_row_top = cd_image.data + cd_image.width * (i + cd_image.height / 2) ;
@@ -159,15 +167,20 @@ void cd_fft_shift(cd_image_T cd_image){
     for(size_t i = 0; i < cd_image.width / 2; i++){
         cdouble_T * cd_col_left = get_cd_column(cd_image, i);
         cdouble_T * cd_col_right = get_cd_column(cd_image, i + cd_image.width/2);
+        if(!cd_col_left || !cd_col_right) goto error;
         memcpy(temp_col, cd_col_left, cd_image.height * sizeof(cdouble_T));
         store_cd_column(cd_image, i, cd_col_right);
         store_cd_column(cd_image, i + cd_image.width/2, cd_col_left);
     } 
     free(temp_col);
+    return;
+    error:
+    perror("cd_fft_shift");
 }
 
 cd_image_T calculate_2d_dft(dgray_image_T dgray_image){
     cdouble_T * cd_image_data = malloc(dgray_image.height * dgray_image.width * sizeof(cdouble_T));
+    if(!cd_image_data) return (cd_image_T) {0};
     cd_image_T cd_image = {
         .width = dgray_image.width,
         .height = dgray_image.height,

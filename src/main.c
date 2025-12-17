@@ -17,6 +17,7 @@ int main(){
     cd_image_T cd_fft_image = calculate_2d_dft(dgray_image);
     image_T fft_image = convert_cd_to_image(cd_fft_image);
     cdouble_T * test_data = malloc(sizeof(cdouble_T) * 100 * 100);
+    if(!test_data) return 1;
     cd_image_T test_cd_image = {
         .height = 100,
         .width = 100,

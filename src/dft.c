@@ -59,9 +59,13 @@ void fft_recursive(cdouble_T * X, uint32_t N) {
     if (N <= 1) return;
 
     cdouble_T * even = malloc((N / 2) * sizeof(cdouble_T));
+    if(even == NULL){
+        printf("ERROR: fft_recursive() - Failed to allocate memory.\n");
+        return;
+    }
     cdouble_T * odd  = malloc((N / 2) * sizeof(cdouble_T));
-
-    if(even == NULL || odd == NULL){
+    if(odd == NULL){
+        free(even);
         printf("ERROR: fft_recursive() - Failed to allocate memory.\n");
         return;
     }
@@ -161,6 +165,7 @@ cdouble_T * calculate_dft(cdouble_T * data , uint32_t N){
         return NULL;
     }
     cdouble_T * X = (cdouble_T * ) malloc(N * sizeof(cdouble_T));
+    if(!X) return NULL;
     for (uint32_t i = 0; i < N / 2; i++){
         X[i].re = 0;
         X[i].im = 0;
